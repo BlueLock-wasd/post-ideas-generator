@@ -126,6 +126,10 @@ export default function App() {
     window.setTimeout(() => setCopiedIndex(null), 2000);
   }, []);
 
+  const removeIdea = useCallback((index: number) => {
+    setCurrentIdeas(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
   const restoreFromHistory = useCallback((entry: HistoryEntry) => {
     setCurrentIdeas(entry.ideas);
     setCurrentIdeaTone(entry.isCustom ? `Свой промпт · ${entry.toneLabel}` : entry.toneLabel);
@@ -328,7 +332,7 @@ export default function App() {
                   </button>
 
                   {isDropdownOpen && (
-                    <div className="animate-fade-in absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl glass-strong p-1.5 shadow-2xl shadow-black/50">
+                    <div className="absolute right-full top-0 z-[9999] ml-2 min-w-[180px] rounded-xl glass-strong p-1.5 shadow-2xl shadow-black/50">
                       {tones.map((tone) => (
                         <button
                           key={tone.id}
@@ -336,16 +340,16 @@ export default function App() {
                             setSelectedTone(tone);
                             setIsDropdownOpen(false);
                           }}
-                          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                             tone.id === selectedTone.id
                               ? 'bg-teal-500/15 text-teal-300'
                               : 'text-white/60 hover:bg-white/5 hover:text-white'
                           }`}
                         >
-                          <Lightbulb className="h-3.5 w-3.5 opacity-60" />
-                          {tone.label}
+                          <Lightbulb className="h-3.5 w-3.5 flex-shrink-0 text-teal-400" />
+                          <span className="flex-1 text-left break-words">{tone.label}</span>
                           {tone.id === selectedTone.id && (
-                            <Check className="ml-auto h-3.5 w-3.5" />
+                            <Check className="h-3.5 w-3.5 flex-shrink-0 text-teal-400" />
                           )}
                         </button>
                       ))}
@@ -398,6 +402,16 @@ export default function App() {
                     {currentIdeas.length > 1 && ` · ${index + 1}/${currentIdeas.length}`}
                   </span>
                   <div className="flex gap-2">
+                    {/* Кнопка удаления (крестик) */}
+                    <button
+                      onClick={() => removeIdea(index)}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg glass text-white/60 transition-all hover:bg-white/10 hover:text-white"
+                      title="Удалить идею"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+
+                    {/* Кнопка копирования */}
                     <button
                       onClick={() => handleCopy(idea, index)}
                       className="flex h-9 w-9 items-center justify-center rounded-lg glass text-white/60 transition-all hover:text-white"
@@ -405,6 +419,8 @@ export default function App() {
                     >
                       {copiedIndex === index ? <Check className="h-4 w-4 text-teal-400" /> : <Copy className="h-4 w-4" />}
                     </button>
+
+                    {/* Кнопка "Ещё идею" (показывается, если только одна карточка) */}
                     {currentIdeas.length === 1 && (
                       <button
                         onClick={handleGenerate}
