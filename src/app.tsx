@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Sparkles, ChevronDown, Copy, Check, RefreshCw, Loader2, Lightbulb, PenLine, X, History, Trash2 } from 'lucide-react';
 import { tones, generateMultipleIdeas, generateMultipleCustomIdeas, type Idea, type Tone } from '@/data/ideaGenerator';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import { generateAIIdeas } from '@/api';
 
 const motivatingPhrases = [
   'Взял и сделал 🐱\u200d👤',
@@ -70,39 +71,48 @@ export default function App() {
     if (isGenerating) return;
     if (isCustomMode && !customPrompt.trim()) return;
 
+    setIsDropdownOpen(false);
     setIsGenerating(true);
     setCopiedIndex(null);
-    window.setTimeout(() => {
-      let newIdeas: Idea[];
-      let toneLabel: string;
-      let promptForHistory: string;
 
-      if (isCustomMode) {
-        newIdeas = generateMultipleCustomIdeas(customPrompt, quantity);
-        toneLabel = `Свой промпт · ${selectedTone.label}`;
-        promptForHistory = customPrompt.trim();
-      } else {
-        newIdeas = generateMultipleIdeas(selectedTone.id, quantity);
-        toneLabel = selectedTone.label;
-        promptForHistory = selectedTone.label;
+    (async () => {
+      try {
+        let newIdeas: Idea[];
+        let toneLabel: string;
+        let promptForHistory: string;
+
+        if (isCustomMode) {
+          // ← Используем AI для кастомного режима
+          newIdeas = await generateAIIdeas(selectedTone.label, quantity, customPrompt);
+          toneLabel = `Свой промпт · ${selectedTone.label}`;
+          promptForHistory = customPrompt.trim();
+        } else {
+          // ← Используем AI для обычного режима
+          newIdeas = await generateAIIdeas(selectedTone.label, quantity);
+          toneLabel = selectedTone.label;
+          promptForHistory = selectedTone.label;
+        }
+
+        setCurrentIdeas(newIdeas);
+        setCurrentIdeaTone(toneLabel);
+        setCount((prev) => prev + newIdeas.length);
+
+        const entry: HistoryEntry = {
+          id: historyIdRef.current++,
+          prompt: promptForHistory,
+          toneLabel: selectedTone.label,
+          isCustom: isCustomMode,
+          ideas: newIdeas,
+          timestamp: Date.now(),
+        };
+        setHistory((prev) => [entry, ...prev].slice(0, 20));
+      } catch (error) {
+        console.error('Ошибка генерации:', error);
+        // Можно показать уведомление пользователю
+      } finally {
+        setIsGenerating(false);
       }
-
-      setCurrentIdeas(newIdeas);
-      setCurrentIdeaTone(toneLabel);
-      setCount((prev) => prev + newIdeas.length);
-
-      const entry: HistoryEntry = {
-        id: historyIdRef.current++,
-        prompt: promptForHistory,
-        toneLabel: selectedTone.label,
-        isCustom: isCustomMode,
-        ideas: newIdeas,
-        timestamp: Date.now(),
-      };
-      setHistory((prev) => [entry, ...prev].slice(0, 20));
-
-      setIsGenerating(false);
-    }, 850);
+    })();
   }, [isGenerating, isCustomMode, customPrompt, selectedTone, quantity]);
 
   useEffect(() => {
