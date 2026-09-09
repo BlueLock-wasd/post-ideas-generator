@@ -9,7 +9,9 @@
 
 ## 🖼️ Скриншот
 
-![Интерфейс генератора идей](./image/img_final.png)
+
+![Интерфейс генератора идей]![img_final.png](image/img_final.png)
+
 
 ---
 
@@ -41,7 +43,7 @@
 
 ## 📁 Структура проекта
 
-```
+
 IdeaGen/
 ├── server/                # Бэкенд-прокси для OpenRouter
 │   ├── server.js
@@ -174,5 +176,3 @@ npm run dev
 - [Lucide](https://lucide.dev) — за красивые иконки
 - [Tailwind CSS](https://tailwindcss.com) — за удобную стилизацию
 ```
-
-_

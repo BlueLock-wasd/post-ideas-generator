@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const MODEL = 'openai/gpt-3.5-turbo';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_URL = '/api/generate';
 
 export async function generateAIResponse(prompt: string): Promise<string | null> {
   try {
@@ -25,7 +24,6 @@ export async function generateAIResponse(prompt: string): Promise<string | null>
       },
       {
         headers: {
-          'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json',
         },
       }

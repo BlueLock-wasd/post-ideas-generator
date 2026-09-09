@@ -1,44 +1,53 @@
 import express from 'express';
 import cors from 'cors';
-import axios from 'axios';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { OpenRouter } from '@openrouter/sdk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Загружаем .env из корня проекта
 dotenv.config({ path: resolve(__dirname, '../.env') });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = process.env.VITE_OPENROUTER_API_KEY;
 
 if (!API_KEY) {
-  console.error('❌ API ключ не найден! Создай файл .env в корне проекта с VITE_OPENROUTER_API_KEY');
+  console.error('❌ API ключ не найден!');
   process.exit(1);
 }
 
+// Инициализируем OpenRouter SDK
+const openrouter = new OpenRouter({
+  apiKey: API_KEY,
+});
+
 app.post('/api/generate', async (req, res) => {
   try {
-    const response = await axios.post(
-      OPENROUTER_URL,
-      req.body,
-      {
-        headers: {
-          'Authorization': `Bearer ${API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+    console.log('📤 Запрос получен');
+
+    const { model, messages, max_tokens, temperature } = req.body;
+
+    // ✅ Правильный формат для SDK
+    const completion = await openrouter.chat.send({
+      chatRequest: {
+        model: model || 'openai/gpt-3.5-turbo',
+        messages: messages || [],
+        max_tokens: max_tokens || 300,
+        temperature: temperature || 0.7,
       }
-    );
-    res.json(response.data);
+    });
+
+    console.log('✅ Ответ получен');
+    res.json(completion);
   } catch (error) {
-    console.error('❌ Ошибка прокси:', error.message);
-    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Ошибка сервера' });
+    console.error('❌ Ошибка:', error.message);
+    console.error('📄 Детали:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
