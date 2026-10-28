@@ -10,8 +10,7 @@
 ## 🖼️ Скриншот
 
 
-![Скриншот](./image/img_final.jpg)
-![Скриншот2](./image/img.png)
+![Скриншот](image/img_final.jpg)
 
 ---
 
