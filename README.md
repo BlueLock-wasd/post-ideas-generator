@@ -10,8 +10,8 @@
 ## 🖼️ Скриншот
 
 
-![Интерфейс генератора идей]![img_final.png](image/img_final.png)
-
+![Скриншот](./image/img_final.jpg)
+![Скриншот2](./image/img.png)
 
 ---
 
