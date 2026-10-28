@@ -1,3 +1,5 @@
+<img src="/image/img_final.jpg" alt="Скриншот" width="100%">
+
 ```markdown
 # 🧠 Генератор идей для постов
 
